@@ -34,7 +34,7 @@ def authenticate(cn: str, password: str):
                         attributes=ldap3.ALL_ATTRIBUTES)
 
             if not conn.entries:
-                return 404, '[ ERROR ] : could not find user object'
+                return 404, '[ ERROR ] : could not find user object.'
 
             entry = conn.entries[0]
             fullname = f'{entry.givenName} {entry.sn}'
@@ -42,7 +42,7 @@ def authenticate(cn: str, password: str):
             return 200, fullname
 
         else:
-            return 401, '[ ERROR ] : invalid username and/or password'
+            return 401, '[ ERROR ] : invalid username and/or password.'
 
     except LDAPBindError:
         return 500, '[ ERROR ] : could not connect to LDAP server!'
@@ -55,7 +55,7 @@ def auth():
         status, msg = authenticate(a.username, a.password)
         return Response(msg, status=status)
     else:
-        return Response('[ ERROR ] : could not authenticate', 400)
+        return Response('[ ERROR ] : could not authenticate. Please use HTTP basic authentication.', 400)
 
 
 if __name__ == '__main__':
