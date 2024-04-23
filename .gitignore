@@ -1,0 +1,6 @@
+.DS_Store
+volumes/**
+
+LDAP/__pycache__/
+
+LDAP/.idea/

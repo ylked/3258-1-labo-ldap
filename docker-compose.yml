@@ -1,0 +1,55 @@
+version: "3.8"
+services:
+  ldap-service:
+    container_name: ldap
+    image: ylked/ldap
+
+    environment:
+      - LDAP_ORGANISATION=NDE
+      - LDAP_DOMAIN=ylked.ch
+      - LDAP_ADMIN_PASSWORD=admin
+
+    healthcheck:
+      test: ldapsearch -x -D "cn=admin,dc=ylked,dc=ch" -w admin -b "dc=ylked,dc=ch"
+      start_period: 15s
+      start_interval: 3s
+      timeout: 2s
+
+    command: --copy-service
+
+  phpldapadmin-service:
+    container_name: phpldapadmin
+    image: osixia/phpldapadmin:0.9.0
+    ports:
+      - 6443:443
+
+    environment:
+      - PHPLDAPADMIN_LDAP_HOSTS=ldap-service
+
+
+  server-service:
+    container_name: server
+    image: ylked/ldap-flask
+    ports:
+      - 8088:5000
+    
+    environment:
+      - "FLASKLDAP_HOSTNAME=ldap-service"
+      - "FLASKLDAP_BASE=dc=ylked,dc=ch"
+
+    depends_on:
+      ldap-service:
+        condition: service_healthy
+      
+  testing-service:
+    container_name: testing
+    image: ylked/ldap-flask
+    command: python3 test.py
+
+    depends_on: 
+      ldap-service:
+        condition: service_healthy
+    
+    environment:
+      - "FLASKLDAP_HOSTNAME=ldap-service"
+      - "FLASKLDAP_BASE=dc=ylked,dc=ch"
